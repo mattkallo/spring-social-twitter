@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.social.twitter.api.Entities;
+import org.springframework.social.twitter.api.ExtendedTweet;
 import org.springframework.social.twitter.api.TickerSymbolEntity;
 import org.springframework.social.twitter.api.Tweet;
 import org.springframework.social.twitter.api.TwitterProfile;
@@ -46,17 +47,17 @@ class TweetDeserializer extends JsonDeserializer<Tweet> {
 
 	@Override
 	public Tweet deserialize(final JsonParser jp, final DeserializationContext ctx) throws IOException {
-		final JsonNode node = jp.readValueAs(JsonNode.class);
-		if (null == node || node.isMissingNode() || node.isNull()) {
-			return null;
-		}
-		final Tweet tweet = this.deserialize(node);
+		final Tweet tweet = this.internalDeserializer(jp, ctx);
 		jp.skipChildren();
 		return tweet;
 	}
 
-
-	public Tweet deserialize(JsonNode node) throws IOException, JsonProcessingException {
+	public Tweet internalDeserializer(JsonParser jp, DeserializationContext ctx)
+			throws IOException, JsonProcessingException {
+		final JsonNode node = jp.readValueAs(JsonNode.class);
+		if (null == node || node.isMissingNode() || node.isNull()) {
+			return null;
+		}
 		final String id = node.path("id").asText();
 		final String text = node.path("text").asText();
 		if (id == null  || text == null || text.isEmpty()) {
@@ -66,7 +67,7 @@ class TweetDeserializer extends JsonDeserializer<Tweet> {
 		String dateFormat = TIMELINE_DATE_FORMAT;
 		String fromScreenName = fromUserNode.get("screen_name").asText();
 		long fromId = fromUserNode.get("id").asLong();
-		String fromImageUrl = fromUserNode.get("profile_image_url").asText(); 
+		String fromImageUrl = fromUserNode.get("profile_image_url").asText();
 		Date createdAt = toDate(node.get("created_at").asText(), new SimpleDateFormat(dateFormat, Locale.ENGLISH));
 		String source = node.get("source").asText();
 		JsonNode toUserIdNode = node.get("in_reply_to_user_id");
@@ -88,7 +89,8 @@ class TweetDeserializer extends JsonDeserializer<Tweet> {
 		JsonNode retweetedStatusNode = node.get("retweeted_status");
 		boolean retweeted = retweetedNode != null && !retweetedNode.isNull() ? retweetedNode.asBoolean() : false;
 		tweet.setRetweeted(retweeted);
-		Tweet retweetedStatus = retweetedStatusNode != null ? this.deserialize(retweetedStatusNode) : null;
+		Tweet retweetedStatus =
+				retweetedStatusNode != null ? internalDeserializer(retweetedStatusNode.traverse(jp.getCodec()), ctx) : null;
 		tweet.setRetweetedStatus(retweetedStatus);
 		JsonNode favoritedNode = node.get("favorited");
 		boolean favorited = favoritedNode != null && !favoritedNode.isNull() ? favoritedNode.asBoolean() : false;
@@ -100,6 +102,15 @@ class TweetDeserializer extends JsonDeserializer<Tweet> {
 		tweet.setEntities(entities);
 		TwitterProfile user = toProfile(fromUserNode);
 		tweet.setUser(user);
+		// Retrieve extended fields from tweet
+		JsonNode truncated = node.get("truncated");
+		if (truncated != null) {
+			tweet.setTruncated(truncated.asBoolean(false));
+		}
+		JsonNode extendedTweet = node.get("extended_tweet");
+		if (extendedTweet != null && !extendedTweet.isNull() && extendedTweet.isObject()) {
+			tweet.setExtendedTweet(extendedTweet.traverse(jp.getCodec()).readValueAs(ExtendedTweet.class));
+		}
 		return tweet;
 	}
 

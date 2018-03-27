@@ -21,6 +21,7 @@ import java.util.Date;
 /**
  * Represents a Twitter status update (e.g., a "tweet").
  * @author Craig Walls
+ * @author Mario Lopez
  */
 public class Tweet extends TwitterObject implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -44,6 +45,8 @@ public class Tweet extends TwitterObject implements Serializable {
 	private Integer favoriteCount;
 	private Entities entities;
 	private TwitterProfile user;
+	private boolean truncated;
+	private ExtendedTweet extendedTweet;
 
 	/**
 	 * Constructs a Tweet
@@ -291,6 +294,22 @@ public class Tweet extends TwitterObject implements Serializable {
 		this.inReplyToScreenName = inReplyToScreenName;
 	}
 
+	public boolean isTruncated() {
+		return truncated;
+	}
+
+	public void setTruncated(boolean truncated) {
+		this.truncated = truncated;
+	}
+
+	public ExtendedTweet getExtendedTweet() {
+		return extendedTweet;
+	}
+
+	public void setExtendedTweet(ExtendedTweet extendedTweet) {
+		this.extendedTweet = extendedTweet;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -305,7 +324,7 @@ public class Tweet extends TwitterObject implements Serializable {
 		if (fromUserId != tweet.fromUserId) {
 			return false;
 		}
-		if (id != tweet.id) {
+		if (id != null ? !id.equals(tweet.id) : tweet.id != null) {
 			return false;
 		}
 		if (retweeted != tweet.retweeted) {
@@ -353,7 +372,13 @@ public class Tweet extends TwitterObject implements Serializable {
 		if (user != null ? !user.equals(tweet.user) : tweet.user != null) {
 			return false;
 		}
-	
+		if(truncated != tweet.truncated){
+			return false;
+		}
+		if (extendedTweet != null ? !extendedTweet.equals(tweet.extendedTweet) : tweet.extendedTweet != null) {
+			return false;
+		}
+
 		return true;
 	}
 

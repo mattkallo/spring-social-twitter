@@ -18,6 +18,7 @@ package org.springframework.social.twitter.api.impl;
 import org.springframework.social.twitter.api.AccountSettings;
 import org.springframework.social.twitter.api.DirectMessage;
 import org.springframework.social.twitter.api.Entities;
+import org.springframework.social.twitter.api.ExtendedTweet;
 import org.springframework.social.twitter.api.HashTagEntity;
 import org.springframework.social.twitter.api.MediaEntity;
 import org.springframework.social.twitter.api.MentionEntity;
@@ -55,6 +56,7 @@ class TwitterModule extends SimpleModule {
 		context.setMixInAnnotations(DirectMessage.class, DirectMessageMixin.class);
 		context.setMixInAnnotations(UserList.class, UserListMixin.class);
 		context.setMixInAnnotations(Tweet.class, TweetMixin.class);
+		context.setMixInAnnotations(ExtendedTweet.class, ExtendedTweetMixin.class);
 		context.setMixInAnnotations(SearchResults.class, SearchResultsMixin.class);
 		context.setMixInAnnotations(Place.class, PlaceMixin.class);
 		context.setMixInAnnotations(SimilarPlacesResponse.class, SimilarPlacesMixin.class);
