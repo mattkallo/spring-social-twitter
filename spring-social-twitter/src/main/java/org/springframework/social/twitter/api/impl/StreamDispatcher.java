@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.springframework.social.twitter.api.ExtendedTweet;
 import org.springframework.social.twitter.api.StreamDeleteEvent;
 import org.springframework.social.twitter.api.StreamListener;
 import org.springframework.social.twitter.api.StreamWarningEvent;
@@ -47,6 +48,7 @@ class StreamDispatcher implements Runnable {
 		pool = Executors.newCachedThreadPool();
 		objectMapper = new ObjectMapper();
 		objectMapper.addMixIn(Tweet.class, TweetMixin.class);
+		objectMapper.addMixIn(ExtendedTweet.class, ExtendedTweetMixin.class);
 		objectMapper.addMixIn(StreamDeleteEvent.class, StreamDeleteEventMixin.class);
 		objectMapper.addMixIn(StreamWarningEvent.class, StreamWarningEventMixin.class);
 		active = new AtomicBoolean(true);
